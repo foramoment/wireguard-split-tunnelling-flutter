@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "last_updated": "2025-12-06",
     "total_features": 75,
-    "completed": 0,
+    "completed": 9,
     "categories": [
         {
             "name": "Project Setup",
@@ -13,7 +13,7 @@
                     "category": "setup",
                     "description": "Initialize Flutter project with proper structure",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Run flutter create with org name",
                         "Configure pubspec.yaml with dependencies",
@@ -26,7 +26,7 @@
                     "category": "setup",
                     "description": "Set up theming system with Material 3",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Create theme configuration file",
                         "Define color schemes for light and dark themes",
@@ -39,7 +39,7 @@
                     "category": "setup",
                     "description": "Set up state management (Riverpod or Provider)",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Add state management package to pubspec",
                         "Create base providers/notifiers structure",
@@ -51,7 +51,7 @@
                     "category": "setup",
                     "description": "Set up routing/navigation",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Add go_router or auto_route package",
                         "Define all app routes",
@@ -63,7 +63,7 @@
                     "category": "setup",
                     "description": "Set up local storage (Hive or SQLite)",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Add storage package to pubspec",
                         "Initialize storage on app start",
@@ -80,7 +80,7 @@
                     "category": "models",
                     "description": "Create WireGuard tunnel configuration model",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Define Tunnel model with all WG config fields",
                         "Add JSON serialization",
@@ -92,7 +92,7 @@
                     "category": "models",
                     "description": "Create Peer model for WireGuard peers",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Define Peer model with endpoint, public key, allowed IPs",
                         "Add JSON serialization",
@@ -104,7 +104,7 @@
                     "category": "models",
                     "description": "Create ConnectionStatus model",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Define status enum (disconnected, connecting, connected, error)",
                         "Add statistics fields (bytes sent/received, duration)",
@@ -116,7 +116,7 @@
                     "category": "models",
                     "description": "Create SplitTunnelConfig model",
                     "priority": 2,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Define mode (exclude/include)",
                         "Define app list with package names/paths",
@@ -340,7 +340,7 @@
                     "category": "tunnel",
                     "description": "Implement WireGuard config file parser",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Parse [Interface] section",
                         "Parse [Peer] sections",
@@ -353,7 +353,7 @@
                     "category": "tunnel",
                     "description": "Implement tunnel storage (CRUD)",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Save tunnel to local storage",
                         "Load all tunnels",
