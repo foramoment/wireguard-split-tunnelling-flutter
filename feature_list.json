@@ -2,7 +2,7 @@
     "project": "WireGuard Client with Split Tunneling",
     "version": "0.1.0",
     "last_updated": "2025-12-06",
-    "total_features": 75,
+    "total_features": 78,
     "completed": 16,
     "categories": [
         {
@@ -917,6 +917,51 @@
                         "Handle different screen sizes",
                         "Adapt layout for tablet/desktop",
                         "Test on various devices"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Localization & Messages",
+            "features": [
+                {
+                    "id": "i18n-001",
+                    "category": "i18n",
+                    "description": "Implement language selection",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Add language selection to settings",
+                        "Create translation files for EN/RU",
+                        "Implement locale provider",
+                        "Persist language preference"
+                    ]
+                },
+                {
+                    "id": "i18n-002",
+                    "category": "i18n",
+                    "description": "Single instance handling with friendly message",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Detect if app already running (mutex/lock)",
+                        "Show friendly message instead of error",
+                        "Activate existing window using Windows API",
+                        "Handle minimized/tray state correctly",
+                        "Use IPC if window destroyed (named pipe)"
+                    ]
+                },
+                {
+                    "id": "i18n-003",
+                    "category": "i18n",
+                    "description": "Show split tunneling status on home screen",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Add subtle indicator on tunnel card if split tunneling enabled",
+                        "Show app/folder count in indicator",
+                        "Keep design clean and not overwhelming",
+                        "Tap indicator opens split tunneling settings"
                     ]
                 }
             ]

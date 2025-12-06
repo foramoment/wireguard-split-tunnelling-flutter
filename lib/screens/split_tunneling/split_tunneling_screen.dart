@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../models/split_tunnel_config.dart';
+import '../../services/folder_scanner_service.dart';
 
 /// Split tunneling configuration screen
 class SplitTunnelingScreen extends ConsumerStatefulWidget {
@@ -500,45 +502,72 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
     );
   }
 
-  void _addFolder() {
-    // TODO: Implement folder picker using file_picker
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Folder'),
-        content: const Text(
-          'Folder picker will let you select a directory.\n\n'
-          'For demo, we\'ll add a sample folder.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _folders.add(SplitTunnelFolder(
-                  id: 'folder${_folders.length + 1}',
-                  path: 'C:\\Games\\Steam',
-                  name: 'Steam',
-                  discoveredApps: ['steam.exe', 'steamwebhelper.exe'],
-                  lastScanned: DateTime.now(),
-                ));
-              });
-            },
-            child: const Text('Add Demo Folder'),
-          ),
-        ],
-      ),
+  Future<void> _addFolder() async {
+    // Use file_picker to select a directory
+    final result = await FilePicker.platform.getDirectoryPath(
+      dialogTitle: 'Select folder to scan for applications',
     );
+
+    if (result == null) return; // User cancelled
+
+    // Check if folder already added
+    if (_folders.any((f) => f.path == result)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('This folder is already added')),
+        );
+      }
+      return;
+    }
+
+    // Show loading indicator
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Scanning folder for executables...')),
+      );
+    }
+
+    // Scan the folder
+    final scanner = FolderScannerService();
+    final folder = await scanner.createFolderConfig(result);
+
+    setState(() {
+      _folders.add(folder);
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Found ${folder.discoveredApps.length} executables in ${folder.name}'),
+          backgroundColor: AppColors.connected,
+        ),
+      );
+    }
   }
 
-  void _rescanFolder(SplitTunnelFolder folder) {
+  Future<void> _rescanFolder(SplitTunnelFolder folder) async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Rescanning ${folder.name}...')),
     );
+
+    final scanner = FolderScannerService();
+    final updatedFolder = await scanner.rescanFolder(folder);
+
+    final index = _folders.indexWhere((f) => f.id == folder.id);
+    if (index != -1) {
+      setState(() {
+        _folders[index] = updatedFolder;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Found ${updatedFolder.discoveredApps.length} executables'),
+            backgroundColor: AppColors.connected,
+          ),
+        );
+      }
+    }
   }
 
   void _showFolderApps(SplitTunnelFolder folder) {
