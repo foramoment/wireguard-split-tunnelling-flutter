@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "last_updated": "2025-12-06",
     "total_features": 75,
-    "completed": 13,
+    "completed": 16,
     "categories": [
         {
             "name": "Project Setup",
@@ -186,7 +186,7 @@
                     "category": "ui",
                     "description": "Create tunnel details screen",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Show full tunnel configuration",
                         "Display connection statistics",
@@ -199,7 +199,7 @@
                     "category": "ui",
                     "description": "Create add/edit tunnel form screen",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Create form with all WG fields",
                         "Add validation for each field",
@@ -208,7 +208,11 @@
                     ]
                 },
                 {
-                    "id": "ui-006",`n                    "category": "ui",`n                    "description": "Create import tunnel screen",`n                    "priority": 1,`n                    "passes": true,
+                    "id": "ui-006",
+                    "category": "ui",
+                    "description": "Create import tunnel screen",
+                    "priority": 1,
+                    "passes": true,
                     "steps": [
                         "Add file picker for .conf files",
                         "Show preview of parsed config",
@@ -221,7 +225,7 @@
                     "category": "ui",
                     "description": "Create settings screen",
                     "priority": 2,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Design settings list layout",
                         "Add theme toggle",
