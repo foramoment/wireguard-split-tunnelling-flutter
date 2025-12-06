@@ -5,10 +5,10 @@ Each session should append a summary of work done and current state.
 
 ---
 
-## Project Status: INITIALIZED ✅
+## Project Status: IN DEVELOPMENT 🚧
 ## Total Features: 75
-## Completed Features: 3
-## Current Focus: Core Models and Services
+## Completed Features: 8
+## Current Focus: UI Implementation
 
 ---
 
@@ -74,11 +74,49 @@ Each session should append a summary of work done and current state.
 
 ---
 
+### Session 2 - 2025-12-07 (Coding Agent)
+**Agent**: Coding
+**Status**: COMPLETE ✅
+
+**Work Done**:
+- [x] Implemented Tunnel model with JSON serialization
+- [x] Implemented Peer model with JSON serialization
+- [x] Implemented ConnectionStatus model with state enum
+- [x] Implemented SplitTunnelConfig model with AppInfo and Folder support
+- [x] Implemented TunnelStorageService with Hive persistence
+- [x] Implemented SplitTunnelStorageService
+- [x] Implemented TunnelProvider (Riverpod StateNotifier)
+- [x] Implemented ConnectionProvider
+- [x] Implemented SettingsProvider with SharedPreferences
+- [x] Implemented WireGuard config parser with validation
+- [x] Connected theme mode to settings provider
+- [x] Fixed widget test
+
+**Files Created**:
+- lib/models/tunnel.dart + tunnel.g.dart
+- lib/models/peer.dart + peer.g.dart
+- lib/models/connection_status.dart
+- lib/models/split_tunnel_config.dart + split_tunnel_config.g.dart
+- lib/services/tunnel_storage_service.dart
+- lib/services/split_tunnel_storage_service.dart
+- lib/providers/tunnel_provider.dart
+- lib/providers/connection_provider.dart
+- lib/providers/settings_provider.dart
+- lib/utils/config_parser.dart
+
+**Next Steps**:
+1. Update Home screen to display tunnel list from provider
+2. Implement Import tunnel functionality with file picker
+3. Build proper tunnel card widget
+4. Implement connect/disconnect logic
+
+---
+
 ## Current Environment State
 - Flutter project: INITIALIZED ✅
 - Dependencies: INSTALLED ✅
 - Can build Windows: YES ✅
-- Tests passing: PARTIAL (default test needs update)
+- Tests passing: YES ✅
 - Git initialized: YES ✅
 
 ## Quick Reference
@@ -104,8 +142,9 @@ build/windows/x64/runner/Release/wg_client.exe
 
 | Category | Total | Done | In Progress |
 |----------|-------|------|-------------|
-| Project Setup | 5 | 3 | 0 |
-| Data Models | 5 | 0 | 0 |
+| Project Setup | 5 | 4 | 0 |
+| Data Models | 5 | 4 | 0 |
 | UI - Core Screens | 8 | 0 | 0 |
 | UI - Split Tunneling | 6 | 0 | 0 |
-| Other | 51 | 0 | 0 |
+| Tunnel Management | 4 | 1 | 0 |
+| Other | 47 | 0 | 0 |
