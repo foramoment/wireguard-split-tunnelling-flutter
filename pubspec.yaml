@@ -60,6 +60,7 @@ dependencies:
 
   # Shared Preferences (for simple settings)
   shared_preferences: ^2.5.3
+  uuid: ^4.5.2
 
 dev_dependencies:
   flutter_test:

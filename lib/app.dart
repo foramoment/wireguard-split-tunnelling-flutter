@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
+import 'providers/settings_provider.dart';
 
 /// Main application widget
 class WgClientApp extends ConsumerWidget {
@@ -10,15 +11,15 @@ class WgClientApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // TODO: Watch theme provider for theme switching
-    final isDarkMode = false; // Will be replaced with provider
+    // Watch theme mode from settings
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
       title: 'WireGuard Client',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.system,
+      themeMode: themeMode,
       routerConfig: appRouter,
     );
   }
