@@ -1,0 +1,925 @@
+{
+    "project": "WireGuard Client with Split Tunneling",
+    "version": "0.1.0",
+    "last_updated": "2025-12-06",
+    "total_features": 75,
+    "completed": 0,
+    "categories": [
+        {
+            "name": "Project Setup",
+            "features": [
+                {
+                    "id": "setup-001",
+                    "category": "setup",
+                    "description": "Initialize Flutter project with proper structure",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Run flutter create with org name",
+                        "Configure pubspec.yaml with dependencies",
+                        "Set up folder structure (lib/screens, lib/widgets, lib/services, lib/models)",
+                        "Verify project builds on target platform"
+                    ]
+                },
+                {
+                    "id": "setup-002",
+                    "category": "setup",
+                    "description": "Set up theming system with Material 3",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Create theme configuration file",
+                        "Define color schemes for light and dark themes",
+                        "Set up typography with Google Fonts",
+                        "Create ThemeProvider for theme switching"
+                    ]
+                },
+                {
+                    "id": "setup-003",
+                    "category": "setup",
+                    "description": "Set up state management (Riverpod or Provider)",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Add state management package to pubspec",
+                        "Create base providers/notifiers structure",
+                        "Set up dependency injection"
+                    ]
+                },
+                {
+                    "id": "setup-004",
+                    "category": "setup",
+                    "description": "Set up routing/navigation",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Add go_router or auto_route package",
+                        "Define all app routes",
+                        "Implement navigation guards if needed"
+                    ]
+                },
+                {
+                    "id": "setup-005",
+                    "category": "setup",
+                    "description": "Set up local storage (Hive or SQLite)",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Add storage package to pubspec",
+                        "Initialize storage on app start",
+                        "Create base repository pattern"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Data Models",
+            "features": [
+                {
+                    "id": "model-001",
+                    "category": "models",
+                    "description": "Create WireGuard tunnel configuration model",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Define Tunnel model with all WG config fields",
+                        "Add JSON serialization",
+                        "Add validation methods"
+                    ]
+                },
+                {
+                    "id": "model-002",
+                    "category": "models",
+                    "description": "Create Peer model for WireGuard peers",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Define Peer model with endpoint, public key, allowed IPs",
+                        "Add JSON serialization",
+                        "Link to Tunnel model"
+                    ]
+                },
+                {
+                    "id": "model-003",
+                    "category": "models",
+                    "description": "Create ConnectionStatus model",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Define status enum (disconnected, connecting, connected, error)",
+                        "Add statistics fields (bytes sent/received, duration)",
+                        "Add handshake timestamp"
+                    ]
+                },
+                {
+                    "id": "model-004",
+                    "category": "models",
+                    "description": "Create SplitTunnelConfig model",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Define mode (exclude/include)",
+                        "Define app list with package names/paths",
+                        "Define folder list",
+                        "Add JSON serialization"
+                    ]
+                },
+                {
+                    "id": "model-005",
+                    "category": "models",
+                    "description": "Create AppInfo model for installed applications",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Define app name, package name/path, icon",
+                        "Add methods to get app icon",
+                        "Platform-specific implementations"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "UI - Core Screens",
+            "features": [
+                {
+                    "id": "ui-001",
+                    "category": "ui",
+                    "description": "Create splash screen with app logo",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Design splash screen layout",
+                        "Add app logo/icon",
+                        "Add loading indicator",
+                        "Navigate to home after initialization"
+                    ]
+                },
+                {
+                    "id": "ui-002",
+                    "category": "ui",
+                    "description": "Create onboarding screens",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Design 3-4 onboarding pages",
+                        "Add page indicators",
+                        "Add skip and next buttons",
+                        "Save onboarding completion status"
+                    ]
+                },
+                {
+                    "id": "ui-003",
+                    "category": "ui",
+                    "description": "Create home screen with tunnel list",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Design tunnel list layout",
+                        "Show tunnel name, status indicator",
+                        "Add quick connect toggle",
+                        "Add FAB for adding new tunnel",
+                        "Handle empty state"
+                    ]
+                },
+                {
+                    "id": "ui-004",
+                    "category": "ui",
+                    "description": "Create tunnel details screen",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Show full tunnel configuration",
+                        "Display connection statistics",
+                        "Add connect/disconnect button",
+                        "Add edit and delete actions"
+                    ]
+                },
+                {
+                    "id": "ui-005",
+                    "category": "ui",
+                    "description": "Create add/edit tunnel form screen",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Create form with all WG fields",
+                        "Add validation for each field",
+                        "Add save and cancel buttons",
+                        "Support both create and edit modes"
+                    ]
+                },
+                {
+                    "id": "ui-006",
+                    "category": "ui",
+                    "description": "Create import tunnel screen",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Add file picker for .conf files",
+                        "Show preview of parsed config",
+                        "Add import button",
+                        "Handle parsing errors gracefully"
+                    ]
+                },
+                {
+                    "id": "ui-007",
+                    "category": "ui",
+                    "description": "Create settings screen",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Design settings list layout",
+                        "Add theme toggle",
+                        "Add auto-start toggle",
+                        "Add notification settings",
+                        "Add about section link"
+                    ]
+                },
+                {
+                    "id": "ui-008",
+                    "category": "ui",
+                    "description": "Create about screen",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Show app version and build",
+                        "Add credits/attributions",
+                        "Add links to source/website",
+                        "Add open source licenses"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "UI - Split Tunneling",
+            "features": [
+                {
+                    "id": "split-ui-001",
+                    "category": "split-tunneling",
+                    "description": "Create main split tunneling screen",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Design screen layout with enable toggle",
+                        "Add mode selector (exclude/include)",
+                        "Show current apps count",
+                        "Show current folders count"
+                    ]
+                },
+                {
+                    "id": "split-ui-002",
+                    "category": "split-tunneling",
+                    "description": "Create app picker screen",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "List all installed applications",
+                        "Show app icon and name",
+                        "Add checkbox for selection",
+                        "Add search/filter functionality"
+                    ]
+                },
+                {
+                    "id": "split-ui-003",
+                    "category": "split-tunneling",
+                    "description": "Create excluded apps list view",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Show currently selected apps",
+                        "Allow removing apps from list",
+                        "Show app icons",
+                        "Handle empty state"
+                    ]
+                },
+                {
+                    "id": "split-ui-004",
+                    "category": "split-tunneling",
+                    "description": "Create folder management screen",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "List added folders",
+                        "Show folder path and app count",
+                        "Add button to add new folder",
+                        "Allow removing folders"
+                    ]
+                },
+                {
+                    "id": "split-ui-005",
+                    "category": "split-tunneling",
+                    "description": "Create folder picker dialog",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Integrate file picker for directories",
+                        "Show selected folder path",
+                        "Add confirm button",
+                        "Handle permission errors"
+                    ]
+                },
+                {
+                    "id": "split-ui-006",
+                    "category": "split-tunneling",
+                    "description": "Create folder apps preview",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Show list of apps found in folder",
+                        "Display executable names",
+                        "Show scan progress",
+                        "Handle empty folders"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Tunnel Management Logic",
+            "features": [
+                {
+                    "id": "tunnel-001",
+                    "category": "tunnel",
+                    "description": "Implement WireGuard config file parser",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Parse [Interface] section",
+                        "Parse [Peer] sections",
+                        "Handle multiple peers",
+                        "Validate parsed config"
+                    ]
+                },
+                {
+                    "id": "tunnel-002",
+                    "category": "tunnel",
+                    "description": "Implement tunnel storage (CRUD)",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Save tunnel to local storage",
+                        "Load all tunnels",
+                        "Update tunnel config",
+                        "Delete tunnel"
+                    ]
+                },
+                {
+                    "id": "tunnel-003",
+                    "category": "tunnel",
+                    "description": "Implement config file export",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Generate valid .conf file content",
+                        "Use file saver to save file",
+                        "Handle file save errors"
+                    ]
+                },
+                {
+                    "id": "tunnel-004",
+                    "category": "tunnel",
+                    "description": "Implement tunnel validation",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Validate private key format",
+                        "Validate public key format",
+                        "Validate IP address formats",
+                        "Validate endpoint format"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Connection Management",
+            "features": [
+                {
+                    "id": "conn-001",
+                    "category": "connection",
+                    "description": "Create connection service interface",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Define abstract connection service",
+                        "Add connect/disconnect methods",
+                        "Add status stream",
+                        "Add statistics stream"
+                    ]
+                },
+                {
+                    "id": "conn-002",
+                    "category": "connection",
+                    "description": "Implement Windows connection service",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Integrate with WireGuard Windows service",
+                        "Use wireguard.exe/wg.exe via Platform Channel",
+                        "Handle connection states",
+                        "Get real-time statistics"
+                    ]
+                },
+                {
+                    "id": "conn-003",
+                    "category": "connection",
+                    "description": "Implement Android connection service",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Create VpnService implementation",
+                        "Integrate wireguard-android library",
+                        "Handle connection states",
+                        "Get real-time statistics"
+                    ]
+                },
+                {
+                    "id": "conn-004",
+                    "category": "connection",
+                    "description": "Implement macOS connection service",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Create Network Extension",
+                        "Integrate WireGuardKit",
+                        "Handle connection states",
+                        "Get real-time statistics"
+                    ]
+                },
+                {
+                    "id": "conn-005",
+                    "category": "connection",
+                    "description": "Implement iOS connection service",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Create PacketTunnelProvider",
+                        "Integrate WireGuardKit",
+                        "Handle connection states",
+                        "Get real-time statistics"
+                    ]
+                },
+                {
+                    "id": "conn-006",
+                    "category": "connection",
+                    "description": "Implement connection status provider",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Create state notifier for connection status",
+                        "Subscribe to native service updates",
+                        "Expose status to UI"
+                    ]
+                },
+                {
+                    "id": "conn-007",
+                    "category": "connection",
+                    "description": "Implement auto-connect on app start",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Add auto-connect setting",
+                        "Check setting on app start",
+                        "Connect to last used tunnel"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Split Tunneling Logic",
+            "features": [
+                {
+                    "id": "split-001",
+                    "category": "split-tunneling",
+                    "description": "Create split tunneling service interface",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Define abstract split tunnel service",
+                        "Add methods for app exclusion",
+                        "Add methods for getting installed apps",
+                        "Platform-specific implementations"
+                    ]
+                },
+                {
+                    "id": "split-002",
+                    "category": "split-tunneling",
+                    "description": "Implement Android split tunneling",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Use VpnService.Builder.addDisallowedApplication()",
+                        "Get list of installed packages",
+                        "Get app icons via PackageManager",
+                        "Apply exclusions on connect"
+                    ]
+                },
+                {
+                    "id": "split-003",
+                    "category": "split-tunneling",
+                    "description": "Implement Windows split tunneling",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Research WFP or routing approach",
+                        "Get list of running/installed applications",
+                        "Implement exclusion mechanism",
+                        "Apply exclusions on connect"
+                    ]
+                },
+                {
+                    "id": "split-004",
+                    "category": "split-tunneling",
+                    "description": "Implement folder scanner for executables",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Scan directory recursively",
+                        "Find .exe files (Windows) / .app (macOS)",
+                        "Extract app info from executables",
+                        "Return list of found apps"
+                    ]
+                },
+                {
+                    "id": "split-005",
+                    "category": "split-tunneling",
+                    "description": "Implement folder watching for changes",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Set up file system watcher",
+                        "Detect new/removed executables",
+                        "Update app list automatically",
+                        "Handle watcher errors"
+                    ]
+                },
+                {
+                    "id": "split-006",
+                    "category": "split-tunneling",
+                    "description": "Implement split tunneling config storage",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Save excluded apps list",
+                        "Save excluded folders list",
+                        "Load config on app start",
+                        "Support per-tunnel configs"
+                    ]
+                },
+                {
+                    "id": "split-007",
+                    "category": "split-tunneling",
+                    "description": "Implement split tunneling profiles",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Create profile model",
+                        "Save/load profiles",
+                        "Quick switch between profiles",
+                        "Profile management UI"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Platform Integration",
+            "features": [
+                {
+                    "id": "platform-001",
+                    "category": "platform",
+                    "description": "Set up Platform Channels for native code",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Define method channel for VPN",
+                        "Define method channel for split tunneling",
+                        "Create Dart interface",
+                        "Test basic communication"
+                    ]
+                },
+                {
+                    "id": "platform-002",
+                    "category": "platform",
+                    "description": "Implement Windows native code setup",
+                    "priority": 1,
+                    "passes": false,
+                    "steps": [
+                        "Set up C++ plugin structure",
+                        "Implement method channel handlers",
+                        "Add necessary Windows dependencies"
+                    ]
+                },
+                {
+                    "id": "platform-003",
+                    "category": "platform",
+                    "description": "Implement Android native code setup",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Set up Kotlin plugin structure",
+                        "Implement method channel handlers",
+                        "Add VpnService manifest entries"
+                    ]
+                },
+                {
+                    "id": "platform-004",
+                    "category": "platform",
+                    "description": "Implement macOS native code setup",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Set up Swift plugin structure",
+                        "Implement method channel handlers",
+                        "Set up Network Extension entitlements"
+                    ]
+                },
+                {
+                    "id": "platform-005",
+                    "category": "platform",
+                    "description": "Implement iOS native code setup",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Set up Swift plugin structure",
+                        "Implement method channel handlers",
+                        "Set up Network Extension entitlements"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Desktop Features",
+            "features": [
+                {
+                    "id": "desktop-001",
+                    "category": "desktop",
+                    "description": "Implement system tray integration",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Add system tray icon",
+                        "Show connection status in tray",
+                        "Add right-click menu",
+                        "Add quick connect/disconnect"
+                    ]
+                },
+                {
+                    "id": "desktop-002",
+                    "category": "desktop",
+                    "description": "Implement minimize to tray",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Intercept window close",
+                        "Minimize to tray instead of closing",
+                        "Restore from tray click",
+                        "Add setting to disable"
+                    ]
+                },
+                {
+                    "id": "desktop-003",
+                    "category": "desktop",
+                    "description": "Implement auto-start with system",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Add setting toggle",
+                        "Register/unregister startup entry",
+                        "Pass minimized flag on auto-start"
+                    ]
+                },
+                {
+                    "id": "desktop-004",
+                    "category": "desktop",
+                    "description": "Implement window size persistence",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Save window size on resize",
+                        "Save window position",
+                        "Restore on app start"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Mobile Features",
+            "features": [
+                {
+                    "id": "mobile-001",
+                    "category": "mobile",
+                    "description": "Implement QR code scanner for config import",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Add camera permission",
+                        "Integrate QR scanner library",
+                        "Parse scanned config",
+                        "Handle invalid QR codes"
+                    ]
+                },
+                {
+                    "id": "mobile-002",
+                    "category": "mobile",
+                    "description": "Implement quick settings tile (Android)",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Create TileService",
+                        "Show connection status on tile",
+                        "Toggle connection on click"
+                    ]
+                },
+                {
+                    "id": "mobile-003",
+                    "category": "mobile",
+                    "description": "Implement persistent notification (Android)",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Show notification when connected",
+                        "Display connection stats",
+                        "Add disconnect action"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Notifications",
+            "features": [
+                {
+                    "id": "notif-001",
+                    "category": "notifications",
+                    "description": "Implement local notifications",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Add notification package",
+                        "Request notification permissions",
+                        "Show notification on connect/disconnect",
+                        "Show notification on errors"
+                    ]
+                },
+                {
+                    "id": "notif-002",
+                    "category": "notifications",
+                    "description": "Implement notification settings",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Add toggle for connection notifications",
+                        "Add toggle for error notifications",
+                        "Save preferences"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Logging & Debug",
+            "features": [
+                {
+                    "id": "log-001",
+                    "category": "logging",
+                    "description": "Implement logging system",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Set up logging package",
+                        "Define log levels",
+                        "Log important events",
+                        "Store logs to file"
+                    ]
+                },
+                {
+                    "id": "log-002",
+                    "category": "logging",
+                    "description": "Create log viewer screen",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Display logs in scrollable list",
+                        "Add filter by level",
+                        "Add search functionality",
+                        "Add clear logs button"
+                    ]
+                },
+                {
+                    "id": "log-003",
+                    "category": "logging",
+                    "description": "Implement log export",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Export logs to file",
+                        "Share logs (mobile)",
+                        "Anonymize sensitive data"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Testing",
+            "features": [
+                {
+                    "id": "test-001",
+                    "category": "testing",
+                    "description": "Set up unit testing",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Configure test environment",
+                        "Write tests for config parser",
+                        "Write tests for models",
+                        "Set up CI to run tests"
+                    ]
+                },
+                {
+                    "id": "test-002",
+                    "category": "testing",
+                    "description": "Set up widget testing",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Write tests for main screens",
+                        "Test user interactions",
+                        "Test form validation"
+                    ]
+                },
+                {
+                    "id": "test-003",
+                    "category": "testing",
+                    "description": "Set up integration testing",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Create integration test suite",
+                        "Test full user flows",
+                        "Test on multiple platforms"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Polish & UX",
+            "features": [
+                {
+                    "id": "ux-001",
+                    "category": "ux",
+                    "description": "Add loading states and skeletons",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Add loading indicators to all async actions",
+                        "Add skeleton loaders for lists",
+                        "Handle loading state consistently"
+                    ]
+                },
+                {
+                    "id": "ux-002",
+                    "category": "ux",
+                    "description": "Add error handling and messages",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Create error message component",
+                        "Show user-friendly error messages",
+                        "Add retry functionality"
+                    ]
+                },
+                {
+                    "id": "ux-003",
+                    "category": "ux",
+                    "description": "Add haptic feedback (mobile)",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Add haptic on button press",
+                        "Add haptic on toggle",
+                        "Add haptic on connect/disconnect"
+                    ]
+                },
+                {
+                    "id": "ux-004",
+                    "category": "ux",
+                    "description": "Add animations and transitions",
+                    "priority": 3,
+                    "passes": false,
+                    "steps": [
+                        "Add page transition animations",
+                        "Add list item animations",
+                        "Add status change animations"
+                    ]
+                },
+                {
+                    "id": "ux-005",
+                    "category": "ux",
+                    "description": "Implement responsive layout",
+                    "priority": 2,
+                    "passes": false,
+                    "steps": [
+                        "Handle different screen sizes",
+                        "Adapt layout for tablet/desktop",
+                        "Test on various devices"
+                    ]
+                }
+            ]
+        }
+    ]
+}

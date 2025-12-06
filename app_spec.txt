@@ -1,0 +1,146 @@
+# WireGuard Client with Split Tunneling
+
+## Project Overview
+A modern, cross-platform WireGuard VPN client with advanced split tunneling capabilities.
+Built with Flutter for UI and platform-specific native code for VPN functionality.
+
+## Target Platforms
+- Windows (primary)
+- macOS
+- Android
+- iOS
+- Linux (optional)
+
+## Core Philosophy
+- Simple and intuitive UI (inspired by official WireGuard client)
+- Advanced split tunneling with folder-based exclusions
+- Fast, lightweight, and reliable
+
+---
+
+## Feature Categories
+
+### 1. Tunnel Management
+- Import tunnels from .conf files
+- Import tunnels via QR code (mobile)
+- Create tunnels manually with form
+- Edit existing tunnel configurations
+- Delete tunnels
+- Export tunnel configuration
+- Quick toggle connect/disconnect
+
+### 2. Connection Features
+- Connect to selected tunnel
+- Disconnect from active tunnel
+- Auto-connect on app start (optional)
+- Auto-connect on specific network (optional)
+- Kill switch (block internet when VPN disconnects)
+- Reconnect on network change
+
+### 3. Status & Statistics
+- Real-time connection status
+- Data transferred (upload/download)
+- Connection duration
+- Latest handshake time
+- Current endpoint
+- Allowed IPs display
+
+### 4. Split Tunneling (KEY FEATURE)
+- Enable/disable split tunneling per tunnel
+- Two modes:
+  - Exclude mode: VPN for all except listed apps
+  - Include mode: VPN only for listed apps
+- App picker showing all installed applications
+- Search/filter installed apps
+- FOLDER-BASED EXCLUSIONS:
+  - Add folder path
+  - Auto-scan folder for executables
+  - Monitor folder for new executables
+  - Remove folder and all its apps
+- Split tunneling profiles (save/load sets of rules)
+- Per-tunnel split tunneling settings
+
+### 5. User Interface
+- Modern Material 3 design
+- Dark/Light/System theme
+- Smooth animations
+- Responsive layout (mobile/tablet/desktop)
+- System tray integration (desktop)
+- Quick actions from tray
+- Native notifications
+- Onboarding for first-time users
+
+### 6. Settings
+- Theme selection
+- Language selection
+- Auto-start with system
+- Start minimized
+- Notifications toggle
+- Logging level
+- Export logs
+- About screen with version info
+
+### 7. Security
+- Secure storage for private keys
+- Biometric authentication (mobile)
+- PIN/password protection (optional)
+
+---
+
+## Technical Requirements
+
+### WireGuard Integration
+- Windows: Use wireguard.exe/wg.exe CLI or WireGuard Windows service
+- macOS: Network Extension with WireGuard
+- Android: WireGuard tunnel via VpnService
+- iOS: Network Extension with WireGuard
+- Linux: wg-quick integration
+
+### Split Tunneling Implementation
+- Windows: Windows Filtering Platform (WFP) or routing table
+- macOS: Network Extension packet filtering
+- Android: VpnService.Builder.addDisallowedApplication() - NATIVE SUPPORT
+- iOS: NEPacketTunnelProvider routing (limited)
+- Linux: cgroups + nftables/iptables
+
+### Data Storage
+- Local SQLite or Hive for tunnel configs
+- Secure storage for sensitive data (keys)
+- JSON for split tunneling profiles
+
+---
+
+## UI Screens
+
+1. **Splash Screen** - App logo, loading
+2. **Onboarding** - 3-4 slides explaining features
+3. **Home/Tunnel List** - List of tunnels with status
+4. **Tunnel Details** - Full config view, stats, actions
+5. **Add/Edit Tunnel** - Form for tunnel configuration
+6. **Import Tunnel** - File picker / QR scanner
+7. **Split Tunneling** - App list, folders, profiles
+8. **Settings** - All app settings
+9. **Logs** - Debug logs viewer
+10. **About** - App info, credits
+
+---
+
+## Design Guidelines
+
+- Primary Color: #6366F1 (Indigo)
+- Accent Color: #22C55E (Green for connected)
+- Error Color: #EF4444 (Red for disconnected)
+- Use rounded corners (12-16dp)
+- Subtle shadows and elevation
+- Smooth 300ms transitions
+- Haptic feedback on mobile
+
+---
+
+## Non-Goals (Out of Scope for MVP)
+
+- Multi-hop VPN
+- Custom DNS-over-HTTPS
+- Traffic statistics graphs
+- Bandwidth limiting
+- Custom protocols (only WireGuard)

@@ -1,0 +1,163 @@
+# Flutter Build & Test Workflow
+# Supports: self-hosted runner, workflow_dispatch for agent triggering
+
+name: Build and Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  
+  # Allow agent to trigger this workflow via API
+  workflow_dispatch:
+    inputs:
+      test_only:
+        description: 'Run only tests (skip build)'
+        required: false
+        default: 'false'
+        type: boolean
+      platform:
+        description: 'Target platform'
+        required: false
+        default: 'windows'
+        type: choice
+        options:
+          - windows
+          - android
+          - all
+
+# Cancel previous runs on same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze & Test
+    runs-on: self-hosted  # Uses your local machine!
+    # Alternative: runs-on: windows-latest  # For GitHub-hosted
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+      
+      - name: Get dependencies
+        run: flutter pub get
+      
+      - name: Analyze code
+        run: flutter analyze --no-fatal-infos
+      
+      - name: Run tests
+        run: flutter test --coverage
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: coverage/lcov.info
+        continue-on-error: true
+      
+      # Output test results for agent to read
+      - name: Create test summary
+        if: always()
+        run: |
+          echo "## Test Results" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $env:GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $env:GITHUB_STEP_SUMMARY
+          echo "- **Triggered by**: ${{ github.event_name }}" >> $env:GITHUB_STEP_SUMMARY
+
+  build-windows:
+    name: Build Windows
+    runs-on: self-hosted
+    needs: analyze
+    if: ${{ github.event.inputs.test_only != 'true' && (github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all' || github.event.inputs.platform == '') }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+      
+      - name: Get dependencies
+        run: flutter pub get
+      
+      - name: Build Windows
+        run: flutter build windows --release
+      
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: build/windows/x64/runner/Release/
+          retention-days: 7
+
+  build-android:
+    name: Build Android
+    runs-on: self-hosted
+    needs: analyze
+    if: ${{ github.event.inputs.test_only != 'true' && (github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all') }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+      
+      - name: Get dependencies
+        run: flutter pub get
+      
+      - name: Build APK
+        run: flutter build apk --release
+      
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7
+
+  # Final job that can be easily checked by agent
+  report:
+    name: Report Status
+    runs-on: self-hosted
+    needs: [analyze, build-windows, build-android]
+    if: always()
+    
+    steps:
+      - name: Check overall status
+        run: |
+          echo "## Build Report" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $env:GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $env:GITHUB_STEP_SUMMARY
+          echo "| Analyze | ${{ needs.analyze.result }} |" >> $env:GITHUB_STEP_SUMMARY
+          echo "| Windows | ${{ needs.build-windows.result }} |" >> $env:GITHUB_STEP_SUMMARY
+          echo "| Android | ${{ needs.build-android.result }} |" >> $env:GITHUB_STEP_SUMMARY
+      
+      - name: Set final status
+        if: ${{ needs.analyze.result == 'failure' || needs.build-windows.result == 'failure' || needs.build-android.result == 'failure' }}
+        run: exit 1
