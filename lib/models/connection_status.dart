@@ -1,5 +1,5 @@
-/// Connection state enumeration
-enum ConnectionState {
+/// VPN connection state enumeration
+enum VpnConnectionState {
   /// Not connected to any tunnel
   disconnected,
 
@@ -19,7 +19,7 @@ enum ConnectionState {
 /// Represents the current connection status and statistics
 class ConnectionStatus {
   /// Current connection state
-  final ConnectionState state;
+  final VpnConnectionState state;
 
   /// ID of the connected tunnel (null if disconnected)
   final String? tunnelId;
@@ -46,7 +46,7 @@ class ConnectionStatus {
   final String? endpoint;
 
   const ConnectionStatus({
-    this.state = ConnectionState.disconnected,
+    this.state = VpnConnectionState.disconnected,
     this.tunnelId,
     this.tunnelName,
     this.errorMessage,
@@ -59,13 +59,13 @@ class ConnectionStatus {
 
   /// Create a disconnected status
   factory ConnectionStatus.disconnected() {
-    return const ConnectionStatus(state: ConnectionState.disconnected);
+    return const ConnectionStatus(state: VpnConnectionState.disconnected);
   }
 
   /// Create a connecting status
   factory ConnectionStatus.connecting(String tunnelId, String tunnelName) {
     return ConnectionStatus(
-      state: ConnectionState.connecting,
+      state: VpnConnectionState.connecting,
       tunnelId: tunnelId,
       tunnelName: tunnelName,
     );
@@ -78,7 +78,7 @@ class ConnectionStatus {
     String? endpoint,
   }) {
     return ConnectionStatus(
-      state: ConnectionState.connected,
+      state: VpnConnectionState.connected,
       tunnelId: tunnelId,
       tunnelName: tunnelName,
       connectedAt: DateTime.now(),
@@ -89,14 +89,14 @@ class ConnectionStatus {
   /// Create an error status
   factory ConnectionStatus.error(String message) {
     return ConnectionStatus(
-      state: ConnectionState.error,
+      state: VpnConnectionState.error,
       errorMessage: message,
     );
   }
 
   /// Create a copy with updated statistics
   ConnectionStatus copyWith({
-    ConnectionState? state,
+    VpnConnectionState? state,
     String? tunnelId,
     String? tunnelName,
     String? errorMessage,
@@ -120,21 +120,21 @@ class ConnectionStatus {
   }
 
   /// Check if currently connected
-  bool get isConnected => state == ConnectionState.connected;
+  bool get isConnected => state == VpnConnectionState.connected;
 
   /// Check if currently connecting
-  bool get isConnecting => state == ConnectionState.connecting;
+  bool get isConnecting => state == VpnConnectionState.connecting;
 
   /// Check if disconnected
-  bool get isDisconnected => state == ConnectionState.disconnected;
+  bool get isDisconnected => state == VpnConnectionState.disconnected;
 
   /// Check if in error state
-  bool get hasError => state == ConnectionState.error;
+  bool get hasError => state == VpnConnectionState.error;
 
   /// Check if busy (connecting or disconnecting)
   bool get isBusy =>
-      state == ConnectionState.connecting ||
-      state == ConnectionState.disconnecting;
+      state == VpnConnectionState.connecting ||
+      state == VpnConnectionState.disconnecting;
 
   /// Get connection duration
   Duration? get connectionDuration {
@@ -173,15 +173,15 @@ class ConnectionStatus {
   /// Get state display name
   String get stateDisplayName {
     switch (state) {
-      case ConnectionState.disconnected:
+      case VpnConnectionState.disconnected:
         return 'Disconnected';
-      case ConnectionState.connecting:
+      case VpnConnectionState.connecting:
         return 'Connecting...';
-      case ConnectionState.connected:
+      case VpnConnectionState.connected:
         return 'Connected';
-      case ConnectionState.disconnecting:
+      case VpnConnectionState.disconnecting:
         return 'Disconnecting...';
-      case ConnectionState.error:
+      case VpnConnectionState.error:
         return 'Error';
     }
   }

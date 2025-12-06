@@ -56,7 +56,7 @@ class ConnectionStatusNotifier extends StateNotifier<ConnectionStatus> {
 
   /// Start disconnecting
   void startDisconnecting() {
-    state = state.copyWith(state: ConnectionState.disconnecting);
+    state = state.copyWith(state: VpnConnectionState.disconnecting);
   }
 }
 
