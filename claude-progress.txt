@@ -21,7 +21,7 @@ Each session should append a summary of work done and current state.
 **Work Done**:
 - [x] Created project specification (app_spec.txt)
 - [x] Created feature list with 75 features (feature_list.json)
-- [x] Created agent prompts (initializer, coding, testing, ci_integration)
+- [x] Created agent prompts (initializer, coding, testing)
 - [x] Initialized Flutter project with all platforms
 - [x] Set up pubspec.yaml with dependencies:
   - flutter_riverpod (state management)
@@ -37,8 +37,6 @@ Each session should append a summary of work done and current state.
 - [x] Set up Material 3 theming with dark/light modes
 - [x] Verified Windows build works (38.8s build time)
 - [x] Initialized git repository with initial commit
-- [x] Set up GitHub Actions workflow with workflow_dispatch
-- [x] Created CI trigger script for agent integration
 
 **Files Created**:
 - lib/main.dart - App entry point with Riverpod and Hive init
@@ -47,9 +45,6 @@ Each session should append a summary of work done and current state.
 - lib/core/theme/app_theme.dart - Material 3 theme
 - lib/core/router/app_router.dart - go_router config
 - lib/screens/*/\*_screen.dart - 6 placeholder screens
-- .github/workflows/build.yml - CI workflow
-- scripts/trigger-ci.ps1 - CI trigger for agents
-- docs/self-hosted-runner-setup.md - Runner setup guide
 
 **Known Issues**:
 - flutter_secure_storage, permission_handler, flutter_local_notifications 
