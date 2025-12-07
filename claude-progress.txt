@@ -7,8 +7,8 @@ Each session should append a summary of work done and current state.
 
 ## Project Status: IN DEVELOPMENT 🚧
 ## Total Features: 78
-## Completed Features: 22
-## Current Focus: Windows VPN Service & Platform Channels
+## Completed Features: 23
+## Current Focus: Android VPN Service
 
 ---
 
@@ -161,7 +161,7 @@ Use `/continue` workflow or read `AGENT.md`
 
 ---
 
-## Feature Status Summary (Session 5)
+## Feature Status Summary (Session 6)
 
 | Category | Total | Done |
 |----------|-------|------|
@@ -170,10 +170,47 @@ Use `/continue` workflow or read `AGENT.md`
 | UI - Core Screens | 8 | 7 |
 | UI - Split Tunneling | 6 | 3 |
 | Tunnel Management | 4 | 2 |
-| Connection Management | 7 | 2 |
+| Connection Management | 7 | 3 |
 | Split Tunneling Logic | 8 | 2 |
 | Localization & Messages | 3 | 0 |
 | Other | 32 | 0 |
 
-**Total: 22/78 (28%)**
+**Total: 23/78 (29%)**
 
+---
+
+### Session 6 - 2025-12-07 (Coding Agent)
+**Agent**: Coding
+**Status**: COMPLETE ✅
+
+**Work Done**:
+- [x] Fixed split tunnel config persistence bug (AsyncNotifier pattern)
+- [x] Implemented Windows VPN Service with real WireGuard integration
+- [x] UAC elevation via temporary batch files
+- [x] Auto-detection of active tunnels on app startup
+- [x] Connection status properly updates UI (green light on connect!)
+- [x] Tunnel disconnect functionality
+- [x] Connection statistics polling
+
+**Files Created**:
+- `lib/services/windows_vpn_service.dart` (complete rewrite)
+
+**Files Modified**:
+- `lib/providers/split_tunnel_provider.dart` - AsyncNotifier pattern
+- `lib/providers/vpn_connection_provider.dart` - Windows service selection
+- `lib/screens/split_tunneling/split_tunneling_screen.dart` - AsyncValue handling
+
+**Technical Details**:
+- WireGuard integration uses `wireguard.exe /installtunnelservice` via UAC
+- PowerShell `Start-Process -Verb RunAs` for elevation
+- Temporary .bat files to avoid escaping issues
+- `wg.exe show interfaces` for tunnel status detection
+- Retry logic (5 attempts) for connection verification
+
+**Next Steps**:
+1. Android VPN Service (wireguard-android)
+2. Connection log viewer
+3. Auto-connect on app start option
+4. System tray integration
+
+**Known Issues**: None - Windows VPN fully working!
