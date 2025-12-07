@@ -1,21 +1,29 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/tunnel.dart';
 import '../models/connection_status.dart';
 import '../services/vpn_connection_service.dart';
 import '../services/mock_vpn_service.dart';
+import '../services/windows_vpn_service.dart';
 import 'tunnel_provider.dart';
 
 /// Provider for the VPN connection service
 /// 
-/// Currently uses MockVpnConnectionService for development.
-/// Will be replaced with platform-specific implementations:
-/// - Windows: WindowsVpnService
-/// - Android: AndroidVpnService
-/// - macOS: MacOsVpnService
+/// Uses platform-specific implementations:
+/// - Windows: WindowsVpnService (uses installed WireGuard)
+/// - Other platforms: MockVpnConnectionService (for development)
 final vpnServiceProvider = Provider<VpnConnectionService>((ref) {
-  final service = MockVpnConnectionService();
+  final VpnConnectionService service;
+  
+  if (Platform.isWindows) {
+    service = WindowsVpnService();
+  } else {
+    // TODO: Add Android, macOS, Linux implementations
+    service = MockVpnConnectionService();
+  }
+  
   ref.onDispose(() => service.dispose());
   return service;
 });
