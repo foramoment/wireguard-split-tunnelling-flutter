@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../screens/home/home_screen.dart';
+import '../../screens/splash/splash_screen.dart';
 import '../../screens/tunnel_details/tunnel_details_screen.dart';
 import '../../screens/add_tunnel/add_tunnel_screen.dart';
 import '../../screens/import_tunnel/import_tunnel_screen.dart';
@@ -12,6 +13,7 @@ import '../../screens/settings/settings_screen.dart';
 class AppRoutes {
   AppRoutes._();
 
+  static const String splash = '/splash';
   static const String home = '/';
   static const String tunnelDetails = '/tunnel/:id';
   static const String addTunnel = '/tunnel/add';
@@ -23,13 +25,18 @@ class AppRoutes {
 
 /// GoRouter configuration for the app
 final GoRouter appRouter = GoRouter(
-  initialLocation: AppRoutes.home,
+  initialLocation: AppRoutes.splash,
   debugLogDiagnostics: true,
   routes: [
     GoRoute(
       path: AppRoutes.home,
       name: 'home',
       builder: (context, state) => const HomeScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.splash,
+      name: 'splash',
+      builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
       path: AppRoutes.tunnelDetails,

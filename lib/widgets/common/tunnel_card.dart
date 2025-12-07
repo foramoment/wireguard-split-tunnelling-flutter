@@ -7,16 +7,20 @@ class TunnelCard extends StatelessWidget {
   final String name;
   final String? endpoint;
   final VpnConnectionState connectionState;
+  final int? splitTunnelAppCount;
   final VoidCallback? onTap;
   final VoidCallback? onToggle;
+  final VoidCallback? onSplitTunnelTap;
 
   const TunnelCard({
     super.key,
     required this.name,
     this.endpoint,
     this.connectionState = VpnConnectionState.disconnected,
+    this.splitTunnelAppCount,
     this.onTap,
     this.onToggle,
+    this.onSplitTunnelTap,
   });
 
   Color get _statusColor {
@@ -175,6 +179,43 @@ class TunnelCard extends StatelessWidget {
                     ],
                   ),
                 ),
+
+                // Split tunneling indicator
+                if (splitTunnelAppCount != null && splitTunnelAppCount! > 0) ...[
+                  InkWell(
+                    onTap: onSplitTunnelTap,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.secondary.withAlpha(isDark ? 40 : 25),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.splitscreen,
+                            size: 14,
+                            color: theme.colorScheme.secondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$splitTunnelAppCount',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.secondary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
 
                 // Toggle switch
                 Transform.scale(
