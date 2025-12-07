@@ -54,6 +54,31 @@ class WindowsVpnService implements VpnConnectionService {
     
     _logger.i('WireGuard path: $_wireguardPath');
     _logger.i('Config dir: $_configDir');
+    
+    // Check for any currently active tunnels
+    await _checkForActiveTunnel();
+  }
+  
+  /// Check if any WireGuard tunnel is currently active
+  Future<void> _checkForActiveTunnel() async {
+    if (_wgPath == null) return;
+    
+    try {
+      final result = await Process.run(_wgPath!, ['show', 'interfaces']);
+      final interfaces = (result.stdout as String).trim();
+      
+      if (interfaces.isNotEmpty) {
+        // There's an active tunnel!
+        final tunnelName = interfaces.split(RegExp(r'\s+')).first;
+        _logger.i('Found active tunnel: $tunnelName');
+        
+        _activeTunnelName = tunnelName;
+        _updateState(VpnConnectionState.connected);
+        _startStatsPolling();
+      }
+    } catch (e) {
+      _logger.w('Failed to check for active tunnels: $e');
+    }
   }
 
   @override
@@ -111,7 +136,7 @@ class WindowsVpnService implements VpnConnectionService {
       final confPath = await _generateConfigFile(tunnel);
       _logger.i('Generated config file: $confPath');
       
-      // 2. Install tunnel service
+      // 2. Install tunnel service with UAC elevation
       final result = await _installTunnelService(confPath);
       
       if (!result.success) {
@@ -121,11 +146,14 @@ class WindowsVpnService implements VpnConnectionService {
         return result;
       }
       
-      // 3. Wait for connection and verify
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // 4. Check if tunnel is active
-      final isActive = await _isTunnelActive(tunnel.name);
+      // 3. Wait for tunnel service to start and verify with retries
+      bool isActive = false;
+      for (int attempt = 0; attempt < 5; attempt++) {
+        await Future.delayed(const Duration(seconds: 1));
+        isActive = await _isTunnelActive(tunnel.name);
+        _logger.d('Connection check attempt ${attempt + 1}: active=$isActive');
+        if (isActive) break;
+      }
       
       if (isActive) {
         _updateState(VpnConnectionState.connected);
@@ -133,7 +161,7 @@ class WindowsVpnService implements VpnConnectionService {
         return const ConnectionResult.success();
       } else {
         _updateState(VpnConnectionState.error);
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(const Duration(milliseconds: 500));
         _updateState(VpnConnectionState.disconnected);
         return const ConnectionResult.failure('Tunnel did not connect');
       }
@@ -206,8 +234,7 @@ class WindowsVpnService implements VpnConnectionService {
     }
     final privateKey = (privResult.stdout as String).trim();
     
-    // Generate public key from private key
-    // For pubkey, we need to pipe the private key via stdin
+    // Generate public key from private key via stdin
     final pubProcess = await Process.start(_wgPath!, ['pubkey']);
     pubProcess.stdin.writeln(privateKey);
     await pubProcess.stdin.close();
@@ -288,8 +315,7 @@ class WindowsVpnService implements VpnConnectionService {
       }
     }
     
-    // Write to file
-    // Use tunnel name as filename (sanitize for Windows)
+    // Write to file - use tunnel name as filename (sanitize for Windows)
     final safeName = tunnel.name.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
     final confPath = path.join(_configDir!, '$safeName.conf');
     
@@ -299,46 +325,53 @@ class WindowsVpnService implements VpnConnectionService {
     return confPath;
   }
 
-  /// Install tunnel as a Windows service
+  /// Install tunnel as a Windows service (with UAC elevation)
   Future<ConnectionResult> _installTunnelService(String confPath) async {
     if (_wireguardPath == null) {
       return const ConnectionResult.failure('WireGuard not found');
     }
     
     try {
-      // wireguard.exe /installtunnelservice "C:\path\to\config.conf"
-      final result = await Process.run(
-        _wireguardPath!,
-        ['/installtunnelservice', confPath],
-        runInShell: true,
-      );
+      // Create a temporary batch file to avoid PowerShell escaping issues
+      final tempDir = await getTemporaryDirectory();
+      final batPath = path.join(tempDir.path, 'wg_install.bat');
+      final batFile = File(batPath);
       
-      _logger.i('Install tunnel result: exit=${result.exitCode}');
-      _logger.d('stdout: ${result.stdout}');
-      _logger.d('stderr: ${result.stderr}');
+      // Write the command to batch file
+      final batContent = '@echo off\r\n"$_wireguardPath" /installtunnelservice "$confPath"\r\n';
+      await batFile.writeAsString(batContent);
       
-      if (result.exitCode != 0) {
-        final stderr = result.stderr.toString();
-        
-        // Check for common errors
-        if (stderr.contains('Access is denied') || stderr.contains('elevation')) {
-          return const ConnectionResult.failure(
-            'Administrator privileges required. Please run as admin.',
-            errorCode: 'ELEVATION_REQUIRED',
-          );
-        }
-        
-        if (stderr.contains('already exists')) {
-          // Tunnel already installed, try to start it
-          _logger.i('Tunnel already exists, will try to use it');
-          return const ConnectionResult.success();
-        }
-        
-        return ConnectionResult.failure(
-          'Failed to install tunnel: ${result.stderr}',
+      _logger.i('Running elevated: wireguard.exe /installtunnelservice $confPath');
+      
+      // Use PowerShell to run the batch file as admin
+      final result = await Process.run('powershell', [
+        '-NoProfile',
+        '-Command',
+        'Start-Process',
+        '-FilePath', batPath,
+        '-Verb', 'RunAs',
+        '-Wait',
+      ]);
+      
+      _logger.i('PowerShell result: exit=${result.exitCode}');
+      if ((result.stderr as String).isNotEmpty) {
+        _logger.d('stderr: ${result.stderr}');
+      }
+      
+      // Clean up
+      try { await batFile.delete(); } catch (_) {}
+      
+      // If user cancelled UAC
+      final stderr = result.stderr as String;
+      if (stderr.contains('canceled') || stderr.contains('cancelled') ||
+          stderr.contains('The operation was canceled')) {
+        return const ConnectionResult.failure(
+          'Please accept the UAC prompt to connect.',
+          errorCode: 'UAC_CANCELLED',
         );
       }
       
+      // We'll check tunnel status after to verify
       return const ConnectionResult.success();
       
     } catch (e) {
@@ -347,19 +380,35 @@ class WindowsVpnService implements VpnConnectionService {
     }
   }
 
-  /// Uninstall tunnel service
+  /// Uninstall tunnel service (with UAC elevation)
   Future<void> _uninstallTunnelService(String tunnelName) async {
     if (_wireguardPath == null) return;
     
     try {
-      // wireguard.exe /uninstalltunnelservice <tunnel-name>
-      final result = await Process.run(
-        _wireguardPath!,
-        ['/uninstalltunnelservice', tunnelName],
-        runInShell: true,
-      );
+      // Create a temporary batch file
+      final tempDir = await getTemporaryDirectory();
+      final batPath = path.join(tempDir.path, 'wg_uninstall.bat');
+      final batFile = File(batPath);
+      
+      // Sanitize tunnel name
+      final safeName = tunnelName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
+      
+      final batContent = '@echo off\r\n"$_wireguardPath" /uninstalltunnelservice $safeName\r\n';
+      await batFile.writeAsString(batContent);
+      
+      final result = await Process.run('powershell', [
+        '-NoProfile',
+        '-Command',
+        'Start-Process',
+        '-FilePath', batPath,
+        '-Verb', 'RunAs',
+        '-Wait',
+      ]);
       
       _logger.i('Uninstall tunnel result: exit=${result.exitCode}');
+      
+      // Clean up
+      try { await batFile.delete(); } catch (_) {}
       
     } catch (e) {
       _logger.e('Failed to uninstall tunnel: $e');
@@ -370,13 +419,40 @@ class WindowsVpnService implements VpnConnectionService {
   Future<bool> _isTunnelActive(String tunnelName) async {
     if (_wgPath == null) return false;
     
+    // Sanitize tunnel name (same as used for config file)
+    final safeName = tunnelName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
+    
     try {
-      final result = await Process.run(_wgPath!, ['show', tunnelName]);
+      // First try to show this specific tunnel
+      var result = await Process.run(_wgPath!, ['show', safeName]);
       
-      // If wg show returns 0 and has output, tunnel is active
-      return result.exitCode == 0 && 
-             (result.stdout as String).trim().isNotEmpty;
-             
+      _logger.d('wg show $safeName: exit=${result.exitCode}');
+      _logger.d('stdout: ${result.stdout}');
+      
+      if (result.exitCode == 0 && (result.stdout as String).trim().isNotEmpty) {
+        return true;
+      }
+      
+      // Fallback: check if tunnel is in the list of interfaces
+      result = await Process.run(_wgPath!, ['show', 'interfaces']);
+      final interfaces = (result.stdout as String).trim().split(RegExp(r'\s+'));
+      _logger.d('wg interfaces: $interfaces');
+      
+      if (interfaces.contains(safeName)) {
+        return true;
+      }
+      
+      // Also check for Windows service
+      final scResult = await Process.run('sc', ['query', 'WireGuardTunnel\$$safeName']);
+      _logger.d('sc query result: ${scResult.exitCode}');
+      
+      if (scResult.exitCode == 0 && 
+          (scResult.stdout as String).contains('RUNNING')) {
+        return true;
+      }
+      
+      return false;
+      
     } catch (e) {
       _logger.w('Failed to check tunnel status: $e');
       return false;
