@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/tunnel.dart';
 import '../../models/connection_status.dart';
 import '../../providers/tunnel_provider.dart';
-import '../../providers/connection_provider.dart';
+import '../../providers/vpn_connection_provider.dart';
 import '../../widgets/common/tunnel_card.dart';
 import '../../widgets/common/empty_tunnel_state.dart';
 import '../../core/router/app_router.dart';
@@ -17,7 +17,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tunnelsAsync = ref.watch(tunnelsProvider);
-    final connectionStatus = ref.watch(connectionStatusProvider);
+    final connectionStatus = ref.watch(vpnConnectionProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -101,41 +101,7 @@ class HomeScreen extends ConsumerWidget {
     Tunnel tunnel,
     ConnectionStatus status,
   ) {
-    final notifier = ref.read(connectionStatusProvider.notifier);
-
-    if (status.isConnected && status.tunnelId == tunnel.id) {
-      // Disconnect from this tunnel
-      notifier.startDisconnecting();
-      // TODO: Call actual disconnect service
-      Future.delayed(const Duration(milliseconds: 500), () {
-        notifier.setDisconnected();
-      });
-    } else if (status.isConnected && status.tunnelId != tunnel.id) {
-      // Already connected to different tunnel - disconnect first, then connect
-      notifier.startDisconnecting();
-      Future.delayed(const Duration(milliseconds: 500), () {
-        notifier.startConnecting(tunnel.id, tunnel.name);
-        // TODO: Call actual connect service
-        Future.delayed(const Duration(seconds: 1), () {
-          notifier.setConnected(
-            tunnelId: tunnel.id,
-            tunnelName: tunnel.name,
-            endpoint: tunnel.primaryEndpoint,
-          );
-        });
-      });
-    } else {
-      // Not connected - connect to this tunnel
-      notifier.startConnecting(tunnel.id, tunnel.name);
-      // TODO: Call actual connect service
-      Future.delayed(const Duration(seconds: 1), () {
-        notifier.setConnected(
-          tunnelId: tunnel.id,
-          tunnelName: tunnel.name,
-          endpoint: tunnel.primaryEndpoint,
-        );
-      });
-    }
+    ref.read(vpnConnectionProvider.notifier).toggle(tunnel);
   }
 
   void _showAddOptions(BuildContext context) {

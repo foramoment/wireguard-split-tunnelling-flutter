@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/tunnel.dart';
 import '../../models/connection_status.dart';
 import '../../providers/tunnel_provider.dart';
-import '../../providers/connection_provider.dart';
+import '../../providers/vpn_connection_provider.dart';
 import '../../core/theme/app_colors.dart';
 
 /// Tunnel details screen showing full configuration and stats
@@ -21,7 +21,7 @@ class TunnelDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tunnelAsync = ref.watch(tunnelProvider(tunnelId));
-    final connectionStatus = ref.watch(connectionStatusProvider);
+    final connectionStatus = ref.watch(vpnConnectionProvider);
 
     return tunnelAsync.when(
       loading: () => Scaffold(
@@ -118,7 +118,7 @@ class TunnelDetailsScreen extends ConsumerWidget {
   ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final connectionStatus = ref.watch(connectionStatusProvider);
+    final connectionStatus = ref.watch(vpnConnectionProvider);
 
     Color statusColor;
     IconData statusIcon;
@@ -412,23 +412,7 @@ class TunnelDetailsScreen extends ConsumerWidget {
   }
 
   void _toggleConnection(WidgetRef ref, Tunnel tunnel, bool isConnected) {
-    final notifier = ref.read(connectionStatusProvider.notifier);
-
-    if (isConnected) {
-      notifier.startDisconnecting();
-      Future.delayed(const Duration(milliseconds: 500), () {
-        notifier.setDisconnected();
-      });
-    } else {
-      notifier.startConnecting(tunnel.id, tunnel.name);
-      Future.delayed(const Duration(seconds: 1), () {
-        notifier.setConnected(
-          tunnelId: tunnel.id,
-          tunnelName: tunnel.name,
-          endpoint: tunnel.primaryEndpoint,
-        );
-      });
-    }
+    ref.read(vpnConnectionProvider.notifier).toggle(tunnel);
   }
 
   void _showDeleteDialog(BuildContext context, WidgetRef ref, Tunnel tunnel) {
