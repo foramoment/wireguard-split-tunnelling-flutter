@@ -39,7 +39,7 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final config = ref.watch(splitTunnelConfigProvider(_configId));
+    final configAsync = ref.watch(splitTunnelConfigProvider(_configId));
 
     return Scaffold(
       appBar: AppBar(
@@ -48,48 +48,113 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
           preferredSize: const Size.fromHeight(60),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: _buildEnableToggle(theme, config),
+            child: configAsync.when(
+              data: (config) => _buildEnableToggle(theme, config),
+              loading: () => _buildEnableToggleLoading(theme),
+              error: (e, s) => Text('Error: $e'),
+            ),
           ),
         ),
       ),
-      body: Column(
+      body: configAsync.when(
+        data: (config) => _buildContent(theme, config),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, s) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+              const SizedBox(height: 16),
+              Text('Failed to load config: $e'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.invalidate(splitTunnelConfigProvider(_configId)),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEnableToggleLoading(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
         children: [
-          // Mode selector
-          if (config.enabled) ...[
-            _buildModeSelector(theme, config),
-            
-            // Tabs
-            TabBar(
-              controller: _tabController,
-              tabs: [
-                Tab(
-                  icon: const Icon(Icons.apps),
-                  text: 'Apps (${config.apps.length})',
+          Icon(Icons.block, color: theme.iconTheme.color),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Split Tunneling',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                Tab(
-                  icon: const Icon(Icons.folder),
-                  text: 'Folders (${config.folders.length})',
+                Text(
+                  'Loading...',
+                  style: theme.textTheme.bodySmall,
                 ),
               ],
             ),
-            
-            // Tab content
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildAppsTab(theme, config),
-                  _buildFoldersTab(theme, config),
-                ],
-              ),
-            ),
-          ] else ...[
-            Expanded(
-              child: _buildDisabledState(theme),
-            ),
-          ],
+          ),
+          const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildContent(ThemeData theme, SplitTunnelConfig config) {
+    return Column(
+      children: [
+        // Mode selector
+        if (config.enabled) ...[
+          _buildModeSelector(theme, config),
+          
+          // Tabs
+          TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(
+                icon: const Icon(Icons.apps),
+                text: 'Apps (${config.apps.length})',
+              ),
+              Tab(
+                icon: const Icon(Icons.folder),
+                text: 'Folders (${config.folders.length})',
+              ),
+            ],
+          ),
+          
+          // Tab content
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildAppsTab(theme, config),
+                _buildFoldersTab(theme, config),
+              ],
+            ),
+          ),
+        ] else ...[
+          Expanded(
+            child: _buildDisabledState(theme),
+          ),
+        ],
+      ],
     );
   }
 
@@ -470,7 +535,8 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
   }
 
   void _showAppPicker() {
-    final config = ref.read(splitTunnelConfigProvider(_configId));
+    final config = ref.read(splitTunnelConfigProvider(_configId)).valueOrNull;
+    if (config == null) return;
     // TODO: Implement actual app picker using platform-specific code
     // For now, add a demo app
     showDialog(
@@ -506,7 +572,8 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
   }
 
   Future<void> _addFolder() async {
-    final config = ref.read(splitTunnelConfigProvider(_configId));
+    final config = ref.read(splitTunnelConfigProvider(_configId)).valueOrNull;
+    if (config == null) return;
     // Use file_picker to select a directory
     final result = await FilePicker.platform.getDirectoryPath(
       dialogTitle: 'Select folder to scan for applications',
