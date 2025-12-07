@@ -214,3 +214,59 @@ Use `/continue` workflow or read `AGENT.md`
 4. System tray integration
 
 **Known Issues**: None - Windows VPN fully working!
+
+### Session 7 - 2025-12-07 (Coding Agent)
+**Agent**: Coding
+**Status**: COMPLETE ✅
+
+**Work Done**:
+- [x] Implemented system tray integration (desktop-001)
+- [x] Implemented minimize to tray functionality (desktop-002)
+- [x] Solved dependency conflict with `system_tray` by switching to `tray_manager`
+- [x] Added `window_manager` for window control
+- [x] Implemented dynamic PNG -> ICO conversion for Windows tray icons
+- [x] Added context menu with Connect/Disconnect/Show/Quit
+- [x] Added left-click to toggle window visibility
+
+**Files Created**:
+- `lib/services/system_tray_service.dart`
+- `lib/providers/system_tray_provider.dart`
+- `assets/icons/tray_*.png` (generated)
+
+**Files Modified**:
+- `pubspec.yaml` (added dependencies)
+- `lib/main.dart` (window usage)
+- `lib/app.dart` (tray initialization, close handler)
+- `feature_list.json` (marked features complete)
+
+**Technical Details**:
+- Used `tray_manager` 0.2.4
+- Used `dependency_overrides` for `uuid` version conflict
+- Used `image` package for runtime ICO generation
+- Implemented `WindowListener` in `WgClientApp`
+
+**Next Steps**:
+1. Tunnel validation (tunnel-004)
+2. AppInfo model for split tunneling (model-005)
+3. Android VPN Service (conn-003) - when ready
+
+### Session 8 - 2025-12-07 Afternoon (Coding Agent)
+**Agent**: Coding
+**Status**: COMPLETE ✅
+
+**Work Done**:
+- [x] Fixed Windows System Tray icons not appearing
+  - Implemented direct `.ico` loading for Windows (bypassing runtime conversion issues)
+  - Added absolute path resolution for `tray_manager` compatibility
+  - Verified with user: Icon is now visible! ✅
+- [x] Architectural planning for Split Tunneling
+  - Discussed options: Tun2Socks, WFP Driver, "Native" DLL approach
+  - Selected roadmap: Custom DLL (wireguard-go + WinDivert) for future "Pro" mode
+
+**Files Modified**:
+- `lib/services/system_tray_service.dart` (improved icon extraction logic)
+
+**Next Steps**:
+1. Implement Tunnel Validation (tunnel-004) - High value, low risk
+2. AppInfo model for split tunneling (model-005) - Preparation for Android
+3. Android VPN Service implementation (conn-003)

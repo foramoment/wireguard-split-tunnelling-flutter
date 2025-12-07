@@ -69,55 +69,75 @@ class SystemTrayService with TrayListener {
     final iconsDir = Directory(p.join(tempDir.path, 'wg_client_icons'));
     await iconsDir.create(recursive: true);
     
-    _iconDisconnected = await _extractAndConvertIcon(
-      'assets/icons/tray_disconnected.png',
-      p.join(iconsDir.path, 'tray_disconnected'),
+    _iconDisconnected = await _extractIcon(
+      'assets/icons/tray_disconnected',
+      iconsDir.path,
     );
     
-    _iconConnecting = await _extractAndConvertIcon(
-      'assets/icons/tray_connecting.png',
-      p.join(iconsDir.path, 'tray_connecting'),
+    _iconConnecting = await _extractIcon(
+      'assets/icons/tray_connecting',
+      iconsDir.path,
     );
     
-    _iconConnected = await _extractAndConvertIcon(
-      'assets/icons/tray_connected.png',
-      p.join(iconsDir.path, 'tray_connected'),
+    _iconConnected = await _extractIcon(
+      'assets/icons/tray_connected',
+      iconsDir.path,
     );
     
     debugPrint('Extracted icons: disconnected=$_iconDisconnected');
   }
   
-  /// Extract a PNG asset and convert to ICO for Windows
-  Future<String> _extractAndConvertIcon(String assetPath, String targetPathWithoutExt) async {
+  /// Extract icon asset (preferring .ico on Windows)
+  Future<String> _extractIcon(String assetBaseName, String targetDir) async {
     try {
-      final bytes = await rootBundle.load(assetPath);
+      final fileName = p.basename(assetBaseName);
+      
+      // On Windows, try to find a native .ico asset first
+      if (Platform.isWindows) {
+        try {
+          final icoAssetPath = '$assetBaseName.ico';
+          final bytes = await rootBundle.load(icoAssetPath);
+          final icoBytes = bytes.buffer.asUint8List();
+          
+          final targetPath = p.join(targetDir, '$fileName.ico');
+          final file = File(targetPath);
+          await file.writeAsBytes(icoBytes);
+          
+          final absolutePath = file.absolute.path;
+          debugPrint('Using native ICO: $absolutePath (Size: ${icoBytes.length} bytes)');
+          return absolutePath;
+        } catch (e) {
+          debugPrint('Native ICO not found ($assetBaseName.ico), falling back to PNG conversion');
+        }
+      }
+
+      // Fallback: Load PNG
+      final pngAssetPath = '$assetBaseName.png';
+      final bytes = await rootBundle.load(pngAssetPath);
       final pngBytes = bytes.buffer.asUint8List();
       
       if (Platform.isWindows) {
-        // Convert PNG to ICO for Windows
-        final icoPath = '$targetPathWithoutExt.ico';
+        // Convert PNG to ICO
+        final targetPath = p.join(targetDir, '$fileName.ico');
         final icoBytes = await _convertPngToIco(pngBytes);
+        
         if (icoBytes != null) {
-          final file = File(icoPath);
+          final file = File(targetPath);
           await file.writeAsBytes(icoBytes);
-          debugPrint('Created ICO: $icoPath');
-          return icoPath;
-        } else {
-          // Fallback to PNG if conversion fails
-          final pngPath = '$targetPathWithoutExt.png';
-          final file = File(pngPath);
-          await file.writeAsBytes(pngBytes);
-          return pngPath;
+          final absolutePath = file.absolute.path;
+          debugPrint('Created ICO from PNG: $absolutePath');
+          return absolutePath;
         }
-      } else {
-        // Use PNG directly for macOS/Linux
-        final pngPath = '$targetPathWithoutExt.png';
-        final file = File(pngPath);
-        await file.writeAsBytes(pngBytes);
-        return pngPath;
-      }
+      } 
+      
+      // Default/Fallback: Save as PNG (for non-Windows or conversion failure)
+      final targetPath = p.join(targetDir, '$fileName.png');
+      final file = File(targetPath);
+      await file.writeAsBytes(pngBytes);
+      return targetPath;
+
     } catch (e) {
-      debugPrint('Failed to extract/convert asset $assetPath: $e');
+      debugPrint('Failed to extract/convert asset $assetBaseName: $e');
       return '';
     }
   }
@@ -132,7 +152,7 @@ class SystemTrayService with TrayListener {
         return null;
       }
       
-      // Resize to 32x32 for tray icon
+      // Resize to 32x32 for tray icon (standard size)
       final resized = img.copyResize(image, width: 32, height: 32);
       
       // Encode as ICO
