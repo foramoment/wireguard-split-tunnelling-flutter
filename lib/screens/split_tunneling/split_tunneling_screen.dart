@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/split_tunnel_config.dart';
 import '../../services/folder_scanner_service.dart';
+import '../../providers/split_tunnel_provider.dart';
 
 /// Split tunneling configuration screen
 class SplitTunnelingScreen extends ConsumerStatefulWidget {
@@ -20,12 +21,8 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   
-  bool _enabled = false;
-  SplitTunnelMode _mode = SplitTunnelMode.exclude;
-  
-  // Mock data for demo
-  final List<AppInfo> _selectedApps = [];
-  final List<SplitTunnelFolder> _folders = [];
+  /// Get the config ID - use tunnelId if provided, otherwise global
+  String get _configId => widget.tunnelId ?? globalSplitTunnelId;
 
   @override
   void initState() {
@@ -42,6 +39,7 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final config = ref.watch(splitTunnelConfigProvider(_configId));
 
     return Scaffold(
       appBar: AppBar(
@@ -50,15 +48,15 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
           preferredSize: const Size.fromHeight(60),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: _buildEnableToggle(theme),
+            child: _buildEnableToggle(theme, config),
           ),
         ),
       ),
       body: Column(
         children: [
           // Mode selector
-          if (_enabled) ...[
-            _buildModeSelector(theme),
+          if (config.enabled) ...[
+            _buildModeSelector(theme, config),
             
             // Tabs
             TabBar(
@@ -66,11 +64,11 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
               tabs: [
                 Tab(
                   icon: const Icon(Icons.apps),
-                  text: 'Apps (${_selectedApps.length})',
+                  text: 'Apps (${config.apps.length})',
                 ),
                 Tab(
                   icon: const Icon(Icons.folder),
-                  text: 'Folders (${_folders.length})',
+                  text: 'Folders (${config.folders.length})',
                 ),
               ],
             ),
@@ -80,8 +78,8 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildAppsTab(theme),
-                  _buildFoldersTab(theme),
+                  _buildAppsTab(theme, config),
+                  _buildFoldersTab(theme, config),
                 ],
               ),
             ),
@@ -95,11 +93,11 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
     );
   }
 
-  Widget _buildEnableToggle(ThemeData theme) {
+  Widget _buildEnableToggle(ThemeData theme, SplitTunnelConfig config) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: _enabled 
+        color: config.enabled 
             ? AppColors.connected.withAlpha(25)
             : theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
@@ -107,8 +105,8 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
       child: Row(
         children: [
           Icon(
-            _enabled ? Icons.splitscreen : Icons.block,
-            color: _enabled ? AppColors.connected : theme.iconTheme.color,
+            config.enabled ? Icons.splitscreen : Icons.block,
+            color: config.enabled ? AppColors.connected : theme.iconTheme.color,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -123,24 +121,24 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
                   ),
                 ),
                 Text(
-                  _enabled ? 'Active' : 'Disabled',
+                  config.enabled ? 'Active' : 'Disabled',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: _enabled ? AppColors.connected : null,
+                    color: config.enabled ? AppColors.connected : null,
                   ),
                 ),
               ],
             ),
           ),
           Switch(
-            value: _enabled,
-            onChanged: (v) => setState(() => _enabled = v),
+            value: config.enabled,
+            onChanged: (v) => ref.read(splitTunnelConfigProvider(_configId).notifier).setEnabled(v),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildModeSelector(ThemeData theme) {
+  Widget _buildModeSelector(ThemeData theme, SplitTunnelConfig config) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -158,6 +156,7 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
               Expanded(
                 child: _buildModeCard(
                   theme,
+                  config,
                   SplitTunnelMode.exclude,
                   Icons.remove_circle_outline,
                   'Exclude',
@@ -168,6 +167,7 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
               Expanded(
                 child: _buildModeCard(
                   theme,
+                  config,
                   SplitTunnelMode.include,
                   Icons.add_circle_outline,
                   'Include',
@@ -183,16 +183,17 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
 
   Widget _buildModeCard(
     ThemeData theme,
+    SplitTunnelConfig config,
     SplitTunnelMode mode,
     IconData icon,
     String title,
     String description,
   ) {
-    final isSelected = _mode == mode;
+    final isSelected = config.mode == mode;
     final isDark = theme.brightness == Brightness.dark;
 
     return InkWell(
-      onTap: () => setState(() => _mode = mode),
+      onTap: () => ref.read(splitTunnelConfigProvider(_configId).notifier).setMode(mode),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -239,13 +240,13 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
     );
   }
 
-  Widget _buildAppsTab(ThemeData theme) {
-    if (_selectedApps.isEmpty) {
+  Widget _buildAppsTab(ThemeData theme, SplitTunnelConfig config) {
+    if (config.apps.isEmpty) {
       return _buildEmptyState(
         theme,
         Icons.apps,
         'No Apps Selected',
-        'Add applications to ${_mode == SplitTunnelMode.exclude ? "exclude from" : "include in"} VPN',
+        'Add applications to ${config.mode == SplitTunnelMode.exclude ? "exclude from" : "include in"} VPN',
         'Add Apps',
         _showAppPicker,
       );
@@ -256,9 +257,9 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: _selectedApps.length,
+            itemCount: config.apps.length,
             itemBuilder: (context, index) {
-              final app = _selectedApps[index];
+              final app = config.apps[index];
               return Card(
                 child: ListTile(
                   leading: Container(
@@ -276,7 +277,7 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
                     icon: const Icon(Icons.remove_circle_outline),
                     color: AppColors.error,
                     onPressed: () {
-                      setState(() => _selectedApps.removeAt(index));
+                      ref.read(splitTunnelConfigProvider(_configId).notifier).removeApp(app.id);
                     },
                   ),
                 ),
@@ -296,8 +297,8 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
     );
   }
 
-  Widget _buildFoldersTab(ThemeData theme) {
-    if (_folders.isEmpty) {
+  Widget _buildFoldersTab(ThemeData theme, SplitTunnelConfig config) {
+    if (config.folders.isEmpty) {
       return _buildEmptyState(
         theme,
         Icons.folder_open,
@@ -313,9 +314,9 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: _folders.length,
+            itemCount: config.folders.length,
             itemBuilder: (context, index) {
-              final folder = _folders[index];
+              final folder = config.folders[index];
               return Card(
                 child: ListTile(
                   leading: Container(
@@ -343,7 +344,7 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
                         icon: const Icon(Icons.remove_circle_outline),
                         color: AppColors.error,
                         onPressed: () {
-                          setState(() => _folders.removeAt(index));
+                          ref.read(splitTunnelConfigProvider(_configId).notifier).removeFolder(folder.id);
                         },
                       ),
                     ],
@@ -458,7 +459,7 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
             ),
             const SizedBox(height: 24),
             OutlinedButton.icon(
-              onPressed: () => setState(() => _enabled = true),
+              onPressed: () => ref.read(splitTunnelConfigProvider(_configId).notifier).setEnabled(true),
               icon: const Icon(Icons.power_settings_new),
               label: const Text('Enable'),
             ),
@@ -469,6 +470,7 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
   }
 
   void _showAppPicker() {
+    final config = ref.read(splitTunnelConfigProvider(_configId));
     // TODO: Implement actual app picker using platform-specific code
     // For now, add a demo app
     showDialog(
@@ -487,13 +489,14 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              setState(() {
-                _selectedApps.add(AppInfo(
-                  id: 'com.example.app${_selectedApps.length + 1}',
-                  name: 'Demo App ${_selectedApps.length + 1}',
+              final appNum = config.apps.length + 1;
+              ref.read(splitTunnelConfigProvider(_configId).notifier).addApp(
+                AppInfo(
+                  id: 'com.example.app$appNum',
+                  name: 'Demo App $appNum',
                   path: 'C:\\Program Files\\DemoApp\\app.exe',
-                ));
-              });
+                ),
+              );
             },
             child: const Text('Add Demo App'),
           ),
@@ -503,6 +506,7 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
   }
 
   Future<void> _addFolder() async {
+    final config = ref.read(splitTunnelConfigProvider(_configId));
     // Use file_picker to select a directory
     final result = await FilePicker.platform.getDirectoryPath(
       dialogTitle: 'Select folder to scan for applications',
@@ -511,7 +515,7 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
     if (result == null) return; // User cancelled
 
     // Check if folder already added
-    if (_folders.any((f) => f.path == result)) {
+    if (config.folders.any((f) => f.path == result)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('This folder is already added')),
@@ -531,9 +535,8 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
     final scanner = FolderScannerService();
     final folder = await scanner.createFolderConfig(result);
 
-    setState(() {
-      _folders.add(folder);
-    });
+    // Add to provider (persists automatically)
+    await ref.read(splitTunnelConfigProvider(_configId).notifier).addFolder(folder);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -553,20 +556,16 @@ class _SplitTunnelingScreenState extends ConsumerState<SplitTunnelingScreen>
     final scanner = FolderScannerService();
     final updatedFolder = await scanner.rescanFolder(folder);
 
-    final index = _folders.indexWhere((f) => f.id == folder.id);
-    if (index != -1) {
-      setState(() {
-        _folders[index] = updatedFolder;
-      });
+    // Update folder in provider (persists automatically)
+    await ref.read(splitTunnelConfigProvider(_configId).notifier).updateFolder(updatedFolder);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Found ${updatedFolder.discoveredApps.length} executables'),
-            backgroundColor: AppColors.connected,
-          ),
-        );
-      }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Found ${updatedFolder.discoveredApps.length} executables'),
+          backgroundColor: AppColors.connected,
+        ),
+      );
     }
   }
 

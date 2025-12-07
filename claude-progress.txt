@@ -7,8 +7,8 @@ Each session should append a summary of work done and current state.
 
 ## Project Status: IN DEVELOPMENT 🚧
 ## Total Features: 78
-## Completed Features: 19
-## Current Focus: Connection Service & Split Tunneling Persistence
+## Completed Features: 22
+## Current Focus: Windows VPN Service & Platform Channels
 
 ---
 
@@ -103,13 +103,41 @@ Each session should append a summary of work done and current state.
 
 ---
 
+### Session 5 - 2025-12-07 Morning (Coding Agent)
+**Agent**: Coding  
+**Status**: COMPLETE ✅
+
+**Work Done**:
+- [x] Created SplitTunnelProvider with Riverpod state management
+- [x] Implemented persistent split tunnel config storage via Hive
+- [x] Connected SplitTunnelingScreen to provider (was using local state)
+- [x] Added per-tunnel split tunnel configs via family providers
+- [x] Updated feature_list to mark ui-001, conn-006, split-006 as complete
+- [x] Verified Windows build works
+
+**Files Created**:
+- lib/providers/split_tunnel_provider.dart
+
+**Files Modified**:
+- lib/screens/split_tunneling/split_tunneling_screen.dart (now uses Riverpod)
+- lib/providers/providers.dart (exports new provider)
+- feature_list.json (3 more features marked complete)
+
+**Next Steps**:
+1. Implement Windows VPN Service (real WireGuard with wg.exe)
+2. Add Platform Channels for native code (platform-001)
+3. Implement tunnel validation (tunnel-004)
+4. Add Android VPN Service
+
+---
+
 ## Current Environment State
 - Flutter project: INITIALIZED ✅
 - Dependencies: INSTALLED ✅
 - Can build Windows: YES ✅
 - Tests passing: YES ✅
 - Git initialized: YES ✅
-- Total commits: 12+
+- Total commits: 13+
 
 ## Quick Reference
 
@@ -133,18 +161,19 @@ Use `/continue` workflow or read `AGENT.md`
 
 ---
 
-## Feature Status Summary (Session 4)
+## Feature Status Summary (Session 5)
 
 | Category | Total | Done |
 |----------|-------|------|
 | Project Setup | 5 | 5 |
 | Data Models | 5 | 4 |
-| UI - Core Screens | 8 | 6 |
+| UI - Core Screens | 8 | 7 |
 | UI - Split Tunneling | 6 | 3 |
 | Tunnel Management | 4 | 2 |
-| Connection Management | 7 | 1 |
-| Split Tunneling Logic | 8 | 1 |
+| Connection Management | 7 | 2 |
+| Split Tunneling Logic | 8 | 2 |
 | Localization & Messages | 3 | 0 |
 | Other | 32 | 0 |
 
-**Total: 19/78 (24%)**
+**Total: 22/78 (28%)**
+

@@ -1,9 +1,9 @@
 {
     "project": "WireGuard Client with Split Tunneling",
     "version": "0.1.0",
-    "last_updated": "2025-12-06",
+    "last_updated": "2025-12-07",
     "total_features": 78,
-    "completed": 19,
+    "completed": 22,
     "categories": [
         {
             "name": "Project Setup",
@@ -146,7 +146,7 @@
                     "category": "ui",
                     "description": "Create splash screen with app logo",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Design splash screen layout",
                         "Add app logo/icon",
@@ -461,7 +461,7 @@
                     "category": "connection",
                     "description": "Implement connection status provider",
                     "priority": 1,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Create state notifier for connection status",
                         "Subscribe to native service updates",
@@ -555,7 +555,7 @@
                     "category": "split-tunneling",
                     "description": "Implement split tunneling config storage",
                     "priority": 2,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Save excluded apps list",
                         "Save excluded folders list",
