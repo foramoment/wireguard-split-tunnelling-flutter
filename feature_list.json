@@ -652,7 +652,7 @@
                     "category": "desktop",
                     "description": "Implement system tray integration",
                     "priority": 2,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Add system tray icon",
                         "Show connection status in tray",
@@ -665,7 +665,7 @@
                     "category": "desktop",
                     "description": "Implement minimize to tray",
                     "priority": 2,
-                    "passes": false,
+                    "passes": true,
                     "steps": [
                         "Intercept window close",
                         "Minimize to tray instead of closing",

@@ -6,3 +6,4 @@ export 'connection_provider.dart';
 export 'settings_provider.dart';
 export 'vpn_connection_provider.dart';
 export 'split_tunnel_provider.dart';
+export 'system_tray_provider.dart';
