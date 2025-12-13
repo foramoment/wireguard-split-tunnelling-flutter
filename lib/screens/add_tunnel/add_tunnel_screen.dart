@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../models/tunnel.dart';
 import '../../models/peer.dart';
 import '../../providers/tunnel_provider.dart';
-import '../../utils/config_parser.dart';
+import '../../utils/tunnel_validator.dart';
 import '../../core/theme/app_colors.dart';
 
 /// Screen for adding or editing a tunnel configuration
@@ -116,7 +116,7 @@ class _AddTunnelScreenState extends ConsumerState<AddTunnelScreen> {
                     label: 'Tunnel Name',
                     hint: 'e.g., Work VPN',
                     icon: Icons.label_outline,
-                    validator: (v) => v!.isEmpty ? 'Name is required' : null,
+                    validator: TunnelValidator.validateTunnelName,
                   ),
                   const SizedBox(height: 24),
 
@@ -130,13 +130,7 @@ class _AddTunnelScreenState extends ConsumerState<AddTunnelScreen> {
                     hint: 'Base64 encoded private key',
                     icon: Icons.key,
                     isSecret: true,
-                    validator: (v) {
-                      if (v!.isEmpty) return 'Private key is required';
-                      if (!WireGuardConfigParser.isValidKey(v)) {
-                        return 'Invalid key format';
-                      }
-                      return null;
-                    },
+                    validator: TunnelValidator.validatePrivateKey,
                   ),
                   const SizedBox(height: 12),
 
@@ -145,7 +139,7 @@ class _AddTunnelScreenState extends ConsumerState<AddTunnelScreen> {
                     label: 'Address',
                     hint: 'e.g., 10.0.0.2/32',
                     icon: Icons.computer,
-                    validator: (v) => v!.isEmpty ? 'Address is required' : null,
+                    validator: TunnelValidator.validateAddressList,
                   ),
                   const SizedBox(height: 12),
 
@@ -154,6 +148,7 @@ class _AddTunnelScreenState extends ConsumerState<AddTunnelScreen> {
                     label: 'DNS (optional)',
                     hint: 'e.g., 1.1.1.1, 8.8.8.8',
                     icon: Icons.dns,
+                    validator: TunnelValidator.validateDns,
                   ),
                   const SizedBox(height: 12),
 
@@ -163,6 +158,7 @@ class _AddTunnelScreenState extends ConsumerState<AddTunnelScreen> {
                     hint: 'e.g., 1420',
                     icon: Icons.settings_ethernet,
                     keyboardType: TextInputType.number,
+                    validator: TunnelValidator.validateMtu,
                   ),
                   const SizedBox(height: 24),
 
@@ -175,13 +171,7 @@ class _AddTunnelScreenState extends ConsumerState<AddTunnelScreen> {
                     label: 'Public Key',
                     hint: 'Server\'s public key',
                     icon: Icons.vpn_key,
-                    validator: (v) {
-                      if (v!.isEmpty) return 'Public key is required';
-                      if (!WireGuardConfigParser.isValidKey(v)) {
-                        return 'Invalid key format';
-                      }
-                      return null;
-                    },
+                    validator: TunnelValidator.validatePublicKey,
                   ),
                   const SizedBox(height: 12),
 
@@ -190,7 +180,7 @@ class _AddTunnelScreenState extends ConsumerState<AddTunnelScreen> {
                     label: 'Endpoint',
                     hint: 'e.g., vpn.example.com:51820',
                     icon: Icons.cloud,
-                    validator: (v) => v!.isEmpty ? 'Endpoint is required' : null,
+                    validator: TunnelValidator.validateEndpoint,
                   ),
                   const SizedBox(height: 12),
 
@@ -199,6 +189,7 @@ class _AddTunnelScreenState extends ConsumerState<AddTunnelScreen> {
                     label: 'Allowed IPs',
                     hint: '0.0.0.0/0, ::/0',
                     icon: Icons.security,
+                    validator: TunnelValidator.validateAllowedIPs,
                   ),
                   const SizedBox(height: 12),
 
@@ -208,6 +199,7 @@ class _AddTunnelScreenState extends ConsumerState<AddTunnelScreen> {
                     hint: 'e.g., 25',
                     icon: Icons.timer,
                     keyboardType: TextInputType.number,
+                    validator: TunnelValidator.validatePersistentKeepalive,
                   ),
                   const SizedBox(height: 12),
 
@@ -217,6 +209,7 @@ class _AddTunnelScreenState extends ConsumerState<AddTunnelScreen> {
                     hint: 'Additional security',
                     icon: Icons.enhanced_encryption,
                     isSecret: true,
+                    validator: TunnelValidator.validatePresharedKey,
                   ),
                   const SizedBox(height: 32),
 
